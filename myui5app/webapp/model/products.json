@@ -1,0 +1,49 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "Laptop",
+      "category": "Electronics",
+      "price": 75000,
+      "stock": 15,
+      "status": "Available",
+      "rating": 4.5
+    },
+    {
+      "id": 2,
+      "name": "Wireless Mouse",
+      "category": "Accessories",
+      "price": 1200,
+      "stock": 50,
+      "status": "Available",
+      "rating": 4.2
+    },
+    {
+      "id": 3,
+      "name": "Keyboard",
+      "category": "Accessories",
+      "price": 2500,
+      "stock": 0,
+      "status": "Out of Stock",
+      "rating": 4.0
+    },
+    {
+      "id": 4,
+      "name": "Monitor",
+      "category": "Electronics",
+      "price": 18000,
+      "stock": 8,
+      "status": "Available",
+      "rating": 4.7
+    },
+    {
+      "id": 5,
+      "name": "Headphones",
+      "category": "Audio",
+      "price": 3500,
+      "stock": 25,
+      "status": "Available",
+      "rating": 4.3
+    }
+  ]
+}

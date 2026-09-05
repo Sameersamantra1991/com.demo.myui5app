@@ -1,0 +1,73 @@
+<mvc:View
+    controllerName="myui5app.controller.ViewOdataService"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m">
+
+    <Page title="People - OData V4">
+
+        <content>
+
+            <Table
+                id="peopleTable"
+                width="auto"
+                growing="true"
+                growingThreshold="10"
+                items="{
+                    path: '/People'
+                }">
+
+                <headerToolbar>
+                    <Toolbar>
+                        <Title
+                            text="People"
+                            level="H2" />
+                    </Toolbar>
+                </headerToolbar>
+
+                <columns>
+
+                    <Column>
+                        <Text text="User Name" />
+                    </Column>
+
+                    <Column>
+                        <Text text="First Name" />
+                    </Column>
+
+                    <Column>
+                        <Text text="Last Name" />
+                    </Column>
+
+                    <Column>
+                        <Text text="Gender" />
+                    </Column>
+
+                </columns>
+
+                <items>
+
+                    <ColumnListItem>
+
+                        <cells>
+
+                            <Text text="{UserName}" />
+
+                            <Text text="{FirstName}" />
+
+                            <Text text="{LastName}" />
+
+                            <Text text="{Gender}" />
+
+                        </cells>
+
+                    </ColumnListItem>
+
+                </items>
+
+            </Table>
+
+        </content>
+
+    </Page>
+
+</mvc:View>

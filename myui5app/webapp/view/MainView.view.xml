@@ -1,0 +1,10 @@
+<mvc:View controllerName="myui5app.controller.MainView"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m">
+    <Page id="page" title="{i18n>title}">
+
+    <Button
+    text="Products"
+    press=".onProductsPress" />
+    </Page>
+</mvc:View>

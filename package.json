@@ -1,0 +1,18 @@
+{
+    "name": "com.demo.myui5app",
+    "scripts": {
+        "build": "mbt build --mtar com.demo.myui5app.mtar",
+        "build:workspaces": "npm run build --workspaces --if-present",
+        "deploy": "cf deploy mta_archives/com.demo.myui5app.mtar --retries 0",
+        "lint": "npm run lint --workspaces --if-present",
+        "ui5lint": "npm run ui5lint --workspaces --if-present",
+        "start:myui5app": "npm start --workspace myui5app",
+        "qunit": "fiori run --open test/unitTests.qunit.html"
+    },
+    "dependencies": {
+        "mbt": "^1"
+    },
+    "workspaces": [
+        "myui5app"
+    ]
+}

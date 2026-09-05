@@ -1,0 +1,45 @@
+<mvc:View
+    controllerName="myui5app.controller.ViewProduct"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m">
+
+    <Page title="Products">
+        <content>
+
+            <Table items="{products>/products}">
+
+                <columns>
+                    <Column>
+                        <Text text="ID"/>
+                    </Column>
+
+                    <Column>
+                        <Text text="Name"/>
+                    </Column>
+
+                    <Column>
+                        <Text text="Category"/>
+                    </Column>
+
+                    <Column>
+                        <Text text="Price"/>
+                    </Column>
+                </columns>
+
+                <items>
+                    <ColumnListItem>
+                        <cells>
+                            <Text text="{products>id}"/>
+                            <Text text="{products>name}"/>
+                            <Text text="{products>category}"/>
+                            <Text text="{products>price}"/>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+
+            </Table>
+
+        </content>
+    </Page>
+
+</mvc:View>
