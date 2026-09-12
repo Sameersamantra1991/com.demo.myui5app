@@ -6,7 +6,7 @@ sap.ui.define([
 ], function (Controller, MessageToast, Fragment, JSONModel) {
     "use strict";
 
-    return Controller.extend("myui5app.controller.ProductView", {
+    return Controller.extend("myui5app.controller.ViewProduct", {
         onInit() {
             // const oModel = this.getView().getModel("products");
             // const oData = oModel.getData();
