@@ -1,0 +1,84 @@
+<mvc:View
+    controllerName="myui5app.controller.oDataV2"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m">
+
+    <Page title="Products - Northwind OData V2">
+
+        <content>
+        <Button
+                text="Filter"
+                icon="sap-icon://filter"
+                press=".onFilterPress"
+                type="Emphasized" />
+
+            <Table
+                id="productsTable"
+                width="auto"
+                growing="true"
+                growingThreshold="10"
+                items="{
+                    path: 'v2>/Products',
+                    parameters: {
+                        select: 'ProductID,ProductName,UnitPrice'
+                    }
+                }">
+
+                <headerToolbar>
+                    <Toolbar>
+                        <Title
+                            text="Products (Northwind)"
+                            level="H2" />
+                    </Toolbar>
+                    <!-- <button text="filter" press=".filterByUnitPrice" /> -->
+                </headerToolbar>
+
+                <columns>
+
+                    <Column>
+                        <Text text="Product ID" />
+                    </Column>
+
+                    <Column>
+                        <Text text="Product Name" />
+                    </Column>
+
+                    <Column>
+                        <Text text="Quantity Per Unit" />
+                    </Column>
+
+                    <Column>
+                        <Text text="Unit Price" />
+                    </Column>
+
+                    <Column>
+                        <Text text="Units In Stock" />
+                    </Column>
+
+                </columns>
+
+                <items>
+
+                    <ColumnListItem>
+
+                        <cells>
+
+                            <Text text="{v2>ProductID}" />
+                            <Text text="{v2>ProductName}" />
+                            <Text text="{v2>QuantityPerUnit}" />
+                            <Text text="{v2>UnitPrice}" />
+                            <Text text="{v2>UnitsInStock}" />
+
+                        </cells>
+
+                    </ColumnListItem>
+
+                </items>
+
+            </Table>
+
+        </content>
+
+    </Page>
+
+</mvc:View>

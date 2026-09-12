@@ -1,0 +1,23 @@
+<mvc:View
+    controllerName="myui5app.controller.NotFound"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m">
+    <Page
+        title="{i18n>notFoundTitle}"
+        showNavButton="false">
+        <content>
+            <MessagePage
+                title="{i18n>notFoundTitle}"
+                text="{i18n>notFoundText}"
+                description="{i18n>notFoundDescription}"
+                showHeader="false"
+                icon="sap-icon://question-mark">
+                <buttons>
+                    <Button
+                        text="{i18n>notFoundBackToHome}"
+                        press=".onNavBackToHome" />
+                </buttons>
+            </MessagePage>
+        </content>
+    </Page>
+</mvc:View>

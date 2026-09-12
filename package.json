@@ -7,9 +7,11 @@
         "lint": "npm run lint --workspaces --if-present",
         "ui5lint": "npm run ui5lint --workspaces --if-present",
         "start:myui5app": "npm start --workspace myui5app",
-        "qunit": "fiori run --open test/unitTests.qunit.html"
+        "qunit": "fiori run --open test/unitTests.qunit.html",
+        "start": "npm start --workspace myui5app"
     },
     "dependencies": {
+        "@ui5/cli": "^4.0.66",
         "mbt": "^1"
     },
     "workspaces": [

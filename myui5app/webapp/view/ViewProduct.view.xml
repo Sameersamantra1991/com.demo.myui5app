@@ -27,7 +27,8 @@
                 </columns>
 
                 <items>
-                    <ColumnListItem>
+                    <ColumnListItem type="Navigation"
+                        press="onProductPress">
                         <cells>
                             <Text text="{products>id}"/>
                             <Text text="{products>name}"/>

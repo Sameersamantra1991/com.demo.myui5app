@@ -8,6 +8,13 @@ server:
       afterMiddleware: compression
       configuration:
         ignoreCertErrors: false
+        backend:
+          - path: /V2
+            url: https://services.odata.org
+            changeOrigin: true
+          - path: /V4
+            url: https://services.odata.org
+            changeOrigin: true
         ui5:
           path:
             - /resources

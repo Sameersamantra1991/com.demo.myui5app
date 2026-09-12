@@ -16,7 +16,7 @@
         },
         "dataSources": {
             "mainService": {
-                "uri": "https://services.odata.org/V4/TripPinServiceRW/",
+                "uri": "/V4/TripPinServiceRW/",
                 "type": "OData",
                 "settings": {
                     "odataVersion": "4.0"
@@ -93,7 +93,10 @@
                 "viewType": "XML",
                 "path": "myui5app.view",
                 "async": true,
-                "viewPath": "myui5app.view"
+                "viewPath": "myui5app.view",
+                "bypassed": {
+                    "target": "TargetNotFound"
+                }
             },
             "routes": [
                 {
@@ -110,6 +113,21 @@
                     "pattern": "people",
                     "name": "people",
                     "target": "people"
+                },
+                {
+                    "pattern": "oDataV2",
+                    "name": "oDataV2",
+                    "target": "oDataV2Target"
+                },
+                {
+                    "pattern": "sampleProduct",
+                    "name": "sampleProduct",
+                    "target": "sampleProduct"
+                },
+                {
+                    "name": "NotFound",
+                    "pattern": ":all*:",
+                    "target": "TargetNotFound"
                 }
             ],
             "targets": {
@@ -125,6 +143,20 @@
                     "viewName": "ViewOdataService",
                     "viewType": "XML",
                     "viewLevel": 2
+                },
+                "sampleProduct": {
+                    "viewName": "sampleProduct",
+                    "viewType": "XML",
+                    "viewLevel": 2
+                },
+                "oDataV2Target": {
+                    "viewName": "oDataV2",
+                    "viewType": "XML",
+                    "viewLevel": 2
+                },
+                "TargetNotFound": {
+                    "id": "NotFound",
+                    "name": "NotFound"
                 }
             }
         },

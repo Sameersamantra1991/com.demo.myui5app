@@ -1,0 +1,274 @@
+<mvc:View
+    controllerName="myui5app.controller.sampleProduct"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+
+    <Page
+        title="Product Management">
+
+        <content>
+
+            <VBox
+                class="sapUiSmallMargin">
+
+                <!-- ================================= -->
+                <!-- Search / Filter / Sort -->
+                <!-- ================================= -->
+
+                <Toolbar>
+
+                    <Title
+                        text="Products"
+                        level="H2" />
+
+                    <ToolbarSpacer />
+
+                    <!-- Search -->
+                    <SearchField
+                        id="productSearch"
+                        width="250px"
+                        placeholder="Search product..."
+                        liveChange=".onSearch" />
+
+                    <!-- Category Filter -->
+                    <Select
+                        id="categorySelect"
+                        width="180px"
+                        selectedKey=""
+                        change=".onCategoryFilter">
+
+                        <items>
+
+                            <core:Item
+                                key=""
+                                text="All Categories" />
+
+                            <core:Item
+                                key="Beverages"
+                                text="Beverages" />
+
+                            <core:Item
+                                key="Condiments"
+                                text="Condiments" />
+
+                            <core:Item
+                                key="Confections"
+                                text="Confections" />
+
+                            <core:Item
+                                key="Dairy Products"
+                                text="Dairy Products" />
+
+                            <core:Item
+                                key="Grains/Cereals"
+                                text="Grains/Cereals" />
+
+                            <core:Item
+                                key="Meat/Poultry"
+                                text="Meat/Poultry" />
+
+                            <core:Item
+                                key="Produce"
+                                text="Produce" />
+
+                            <core:Item
+                                key="Seafood"
+                                text="Seafood" />
+
+                        </items>
+
+                    </Select>
+
+
+                    <!-- Sort -->
+                    <Button
+                        text="Sort by Price"
+                        icon="sap-icon://sort"
+                        press=".onSortByPrice" />
+
+                </Toolbar>
+
+
+                <!-- ================================= -->
+                <!-- Product Table -->
+                <!-- ================================= -->
+
+                <Table
+                    id="productTable"
+                    items="{products>/displayProducts}"
+                    itemPress=".onProductPress"
+                    growing="false"
+                    width="100%"
+                    noDataText="No products found">
+
+                    <columns>
+
+                        <!-- Product ID -->
+                        <Column
+                            width="80px">
+
+                            <Text
+                                text="ID" />
+
+                        </Column>
+
+
+                        <!-- Product Name -->
+                        <Column>
+
+                            <Text
+                                text="Product Name" />
+
+                        </Column>
+
+
+                        <!-- Supplier -->
+                        <Column>
+
+                            <Text
+                                text="Supplier" />
+
+                        </Column>
+
+
+                        <!-- Category -->
+                        <Column>
+
+                            <Text
+                                text="Category" />
+
+                        </Column>
+
+
+                        <!-- Price -->
+                        <Column
+                            hAlign="End">
+
+                            <Text
+                                text="Price" />
+
+                        </Column>
+
+
+                        <!-- Stock -->
+                        <Column
+                            hAlign="Center">
+
+                            <Text
+                                text="Stock" />
+
+                        </Column>
+
+
+                        <!-- Units -->
+                        <Column
+                            hAlign="Center">
+
+                            <Text
+                                text="Units On Order" />
+
+                        </Column>
+
+                    </columns>
+
+
+                    <items>
+
+                        <ColumnListItem
+                            type="Navigation">
+
+                            <cells>
+
+                                <!-- Product ID -->
+                                <Text
+                                    text="{products>ProductID}" />
+
+
+                                <!-- Product Name -->
+                                <Text
+                                    text="{products>ProductName}" />
+
+
+                                <!-- Supplier -->
+                                <Text
+                                    text="{products>Supplier/CompanyName}" />
+
+
+                                <!-- Category -->
+                                <Text
+                                    text="{products>Category/CategoryName}" />
+
+
+                                <!-- Price -->
+                                <ObjectNumber
+                                    number="{
+                                        path: 'products>UnitPrice',
+                                        type: 'sap.ui.model.type.Float',
+                                        formatOptions: {
+                                            minFractionDigits: 2,
+                                            maxFractionDigits: 2
+                                        }
+                                    }"
+                                    unit="USD" />
+
+
+                                <!-- Stock -->
+                                <ObjectNumber
+                                    number="{products>UnitsInStock}" />
+
+
+                                <!-- Units On Order -->
+                                <ObjectNumber
+                                    number="{products>UnitsOnOrder}" />
+
+                            </cells>
+
+                        </ColumnListItem>
+
+                    </items>
+
+                </Table>
+
+
+                <!-- ================================= -->
+                <!-- Pagination -->
+                <!-- ================================= -->
+
+                <Toolbar>
+
+                    <ToolbarSpacer />
+
+                    <!-- Previous -->
+                    <Button
+                        icon="sap-icon://navigation-left-arrow"
+                        tooltip="Previous Page"
+                        press=".onPreviousPage"
+                        enabled="{viewModel>/previousEnabled}" />
+
+
+                    <!-- Page Information -->
+                    <Text
+                        text="Page {viewModel>/currentPage} of {viewModel>/totalPages}"
+                        class="sapUiSmallMarginBegin sapUiSmallMarginEnd" />
+
+
+                    <!-- Next -->
+                    <Button
+                        icon="sap-icon://navigation-right-arrow"
+                        tooltip="Next Page"
+                        press=".onNextPage"
+                        enabled="{viewModel>/nextEnabled}" />
+
+                    <ToolbarSpacer />
+
+                </Toolbar>
+
+            </VBox>
+
+        </content>
+
+    </Page>
+
+</mvc:View>
+
