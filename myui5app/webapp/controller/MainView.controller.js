@@ -11,6 +11,22 @@ sap.ui.define([
                 .getRouter()
                 .navTo("RouteViewProduct");
 
+        },
+
+        onSampleProductPress: function () {
+
+            this.getOwnerComponent()
+                .getRouter()
+                .navTo("sampleProduct");
+
+        },
+
+        onODataV2Press: function () {
+
+            this.getOwnerComponent()
+                .getRouter()
+                .navTo("oDataV2");
+
         }
 
     });

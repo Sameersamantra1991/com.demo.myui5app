@@ -19,51 +19,87 @@ sap.ui.define([
 ) {
     "use strict";
 
+    // CategoryName -> CategoryID fallback (Northwind fixed IDs 1-8).
+    // Used when the Select still yields a name instead of an ID.
+    var mCategoryNameToId = {
+        "Beverages": 1,
+        "Condiments": 2,
+        "Confections": 3,
+        "Dairy Products": 4,
+        "Grains/Cereals": 5,
+        "Meat/Poultry": 6,
+        "Produce": 7,
+        "Seafood": 8
+    };
+
     return Controller.extend("myui5app.controller.sampleProduct", {
-
-
-        
-
 
         onInit: function () {
 
             // ==========================================
-            // OData V2 Model
+            // OData V2 Model (server data, read-only here)
             // ==========================================
 
-            var oModel = new ODataModel(
-                "/V2/Northwind/Northwind.svc/"
+            var oODataModel = new ODataModel(
+                "/V2/Northwind/Northwind.svc/",
+                {
+                    json: true,
+                    useBatch: false
+                }
             );
 
             this.getView().setModel(
-                oModel,
+                oODataModel,
                 "products"
             );
-            console.log(oModel);
-
 
             // ==========================================
-            // View Model
+            // Display Model (plain JSON for the table)
+            // Never call setProperty("/displayProducts")
+            // on an ODataModel - it cannot hold ad-hoc
+            // client-side paths. Keep paging results here.
+            // ==========================================
+
+            this.getView().setModel(
+                new JSONModel({
+                    products: []
+                }),
+                "display"
+            );
+
+            // ==========================================
+            // View Model (paging / filter / sort state)
             // ==========================================
 
             this.getView().setModel(
                 new JSONModel({
                     searchText: "",
-                    category: "",
+                    categoryId: "",
                     currentPage: 1,
                     pageSize: 5,
                     totalProducts: 0,
-                    totalPages: 0,
+                    totalPages: 1,
                     previousEnabled: false,
                     nextEnabled: false,
-                    sortDescending: false
+                    sortDescending: false,
+                    busy: false
                 }),
                 "viewModel"
             );
 
+            // ==========================================
+            // Categories Model (Select dropdown)
+            // ==========================================
+
+            this.getView().setModel(
+                new JSONModel({
+                    items: []
+                }),
+                "categories"
+            );
 
             // ==========================================
-            // Selected Product
+            // Selected Product (dialog)
             // ==========================================
 
             this.getView().setModel(
@@ -71,11 +107,35 @@ sap.ui.define([
                 "selectedProduct"
             );
 
-
-            // Load first page
+            // Load categories first, then first page
+            this._loadCategories();
             this._loadProducts();
         },
 
+        // =====================================================
+        // LOAD CATEGORIES (for the Select filter)
+        // =====================================================
+
+        _loadCategories: function () {
+            var oODataModel = this.getView().getModel("products");
+            var oCategoriesModel = this.getView().getModel("categories");
+
+            oODataModel.read("/Categories", {
+                urlParameters: {
+                    "$select": "CategoryID,CategoryName"
+                },
+                success: function (oData) {
+                    oCategoriesModel.setProperty(
+                        "/items",
+                        oData.results || []
+                    );
+                }.bind(this),
+                error: function () {
+                    // Keep hardcoded Select items as fallback.
+                    // Do not toast - categories are non-critical.
+                }
+            });
+        },
 
         // =====================================================
         // LOAD PRODUCTS
@@ -83,14 +143,14 @@ sap.ui.define([
 
         _loadProducts: function () {
 
-            console.log('loadproducts started...')
-
-            var oModel =
+            var oODataModel =
                 this.getView().getModel("products");
+
+            var oDisplayModel =
+                this.getView().getModel("display");
 
             var oViewModel =
                 this.getView().getModel("viewModel");
-
 
             var iPage =
                 oViewModel.getProperty("/currentPage");
@@ -101,7 +161,6 @@ sap.ui.define([
             var iSkip =
                 (iPage - 1) * iPageSize;
 
-
             // ==========================================
             // Filters
             // ==========================================
@@ -111,13 +170,11 @@ sap.ui.define([
             var sSearchText =
                 oViewModel.getProperty("/searchText");
 
-            var sCategory =
-                oViewModel.getProperty("/category");
+            var sCategoryId =
+                oViewModel.getProperty("/categoryId");
 
-
-            // Search Product Name
+            // Search Product Name (server-side Contains -> startswith/substring)
             if (sSearchText) {
-
                 aFilters.push(
                     new Filter(
                         "ProductName",
@@ -127,19 +184,21 @@ sap.ui.define([
                 );
             }
 
-
-            // Category
-            if (sCategory) {
-
-                aFilters.push(
-                    new Filter(
-                        "Category/CategoryName",
-                        FilterOperator.EQ,
-                        sCategory
-                    )
-                );
+            // Category: Northwind V2 does NOT support filtering
+            // on expanded "Category/CategoryName".
+            // Always filter on the FK "CategoryID".
+            if (sCategoryId !== "" && sCategoryId !== null && sCategoryId !== undefined) {
+                var iCategoryId = parseInt(sCategoryId, 10);
+                if (!isNaN(iCategoryId)) {
+                    aFilters.push(
+                        new Filter(
+                            "CategoryID",
+                            FilterOperator.EQ,
+                            iCategoryId
+                        )
+                    );
+                }
             }
-
 
             // ==========================================
             // Sort
@@ -153,15 +212,14 @@ sap.ui.define([
                 bDescending
             );
 
-
             // ==========================================
-            // Read OData
+            // Read OData (expand Supplier + Category so
+            // CompanyName / CategoryName are populated)
             // ==========================================
 
-            oModel.read("/Products", {
+            oViewModel.setProperty("/busy", true);
 
-                
-
+            oODataModel.read("/Products", {
                 filters: aFilters,
 
                 sorters: [
@@ -170,39 +228,36 @@ sap.ui.define([
 
                 urlParameters: {
                     "$top": iPageSize,
-                    "$skip": iSkip
+                    "$skip": iSkip,
+                    "$expand": "Category,Supplier",
+                    "$select": "ProductID,ProductName,UnitPrice,UnitsInStock,UnitsOnOrder,Discontinued,CategoryID,SupplierID,Category/CategoryName,Category/CategoryID,Supplier/CompanyName",
+                    "$inlinecount": "allpages"
                 },
 
                 success: function (oData) {
-
-                    console.log(
-                        "Products:",
-                        oData.results
-                    );
-
-
-                    // Number of products returned
-                    // for the current request
                     var aProducts =
                         oData.results || [];
 
+                    // Total comes from __count when $inlinecount=allpages
+                    var iTotal = aProducts.length;
+                    if (oData.__count !== undefined && oData.__count !== null) {
+                        iTotal = parseInt(oData.__count, 10);
+                    }
 
-                    // Put current page data
-                    // into displayProducts
-                    oModel.setProperty(
-                        "/displayProducts",
+                    oDisplayModel.setProperty(
+                        "/products",
                         aProducts
                     );
 
+                    oViewModel.setProperty("/busy", false);
 
-                    // Update pagination
-                    this._updatePagination(
-                        aProducts.length
-                    );
+                    // Update pagination with the SERVER total
+                    this._updatePagination(iTotal);
 
                 }.bind(this),
 
                 error: function (oError) {
+                    oViewModel.setProperty("/busy", false);
 
                     console.error(
                         "Error loading products",
@@ -216,15 +271,18 @@ sap.ui.define([
             });
         },
 
-
         // =====================================================
         // SEARCH
         // =====================================================
 
         onSearch: function (oEvent) {
-
             var sSearchText =
-                oEvent.getParameter("newValue");
+                oEvent.getParameter("newValue") || "";
+
+            // SearchField clear button fires with undefined
+            if (oEvent.getParameter("clearButtonPressed")) {
+                sSearchText = "";
+            }
 
             var oViewModel =
                 this.getView().getModel("viewModel");
@@ -243,22 +301,37 @@ sap.ui.define([
             this._loadProducts();
         },
 
-
         // =====================================================
         // CATEGORY FILTER
+        // Handles both CategoryID keys (fixed view) and legacy
+        // CategoryName keys (maps name -> ID).
         // =====================================================
 
         onCategoryFilter: function (oEvent) {
+            var sKey = oEvent.getParameter("selectedKey");
+            if (sKey === undefined || sKey === null) {
+                var oSelect = oEvent.getSource();
+                sKey = oSelect.getSelectedKey();
+            }
 
-            var sCategory =
-                oEvent.getParameter("selectedKey");
+            // Backward compat: old view sent CategoryName
+            if (sKey && isNaN(parseInt(sKey, 10)) && mCategoryNameToId[sKey]) {
+                sKey = String(mCategoryNameToId[sKey]);
+            }
 
+            // "All Categories" sends ""
             var oViewModel =
                 this.getView().getModel("viewModel");
 
             oViewModel.setProperty(
+                "/categoryId",
+                sKey || ""
+            );
+
+            // Also keep /category in sync for any old bindings
+            oViewModel.setProperty(
                 "/category",
-                sCategory
+                sKey || ""
             );
 
             // Start from page 1
@@ -270,13 +343,11 @@ sap.ui.define([
             this._loadProducts();
         },
 
-
         // =====================================================
         // SORT
         // =====================================================
 
         onSortByPrice: function () {
-
             var oViewModel =
                 this.getView().getModel("viewModel");
 
@@ -290,16 +361,18 @@ sap.ui.define([
                 !bDescending
             );
 
+            MessageToast.show(
+                !bDescending ? "Sorted by price: high to low" : "Sorted by price: low to high"
+            );
+
             this._loadProducts();
         },
-
 
         // =====================================================
         // NEXT PAGE
         // =====================================================
 
         onNextPage: function () {
-
             var oViewModel =
                 this.getView().getModel("viewModel");
 
@@ -309,9 +382,7 @@ sap.ui.define([
             var iTotalPages =
                 oViewModel.getProperty("/totalPages");
 
-
             if (iCurrentPage < iTotalPages) {
-
                 oViewModel.setProperty(
                     "/currentPage",
                     iCurrentPage + 1
@@ -321,22 +392,18 @@ sap.ui.define([
             }
         },
 
-
         // =====================================================
         // PREVIOUS PAGE
         // =====================================================
 
         onPreviousPage: function () {
-
             var oViewModel =
                 this.getView().getModel("viewModel");
 
             var iCurrentPage =
                 oViewModel.getProperty("/currentPage");
 
-
             if (iCurrentPage > 1) {
-
                 oViewModel.setProperty(
                     "/currentPage",
                     iCurrentPage - 1
@@ -346,13 +413,11 @@ sap.ui.define([
             }
         },
 
-
         // =====================================================
-        // PAGINATION
+        // PAGINATION (server total driven)
         // =====================================================
 
-        _updatePagination: function (iCurrentCount) {
-
+        _updatePagination: function (iTotal) {
             var oViewModel =
                 this.getView().getModel("viewModel");
 
@@ -362,29 +427,27 @@ sap.ui.define([
             var iPageSize =
                 oViewModel.getProperty("/pageSize");
 
-
-            /*
-             * Northwind returns __count when
-             * $inlinecount is requested.
-             */
-
-            var oModel =
-                this.getView().getModel("products");
-
-            var oData =
-                oModel.getProperty("/");
-
-            var iTotal =
-                oData.__count
-                    ? parseInt(oData.__count, 10)
-                    : iCurrentCount;
-
+            iTotal = parseInt(iTotal, 10);
+            if (isNaN(iTotal) || iTotal < 0) {
+                iTotal = 0;
+            }
 
             var iTotalPages =
                 Math.ceil(
                     iTotal / iPageSize
                 );
 
+            // Always show at least page 1 of 1 for empty sets
+            // so the "Page X of Y" label never shows "1 of 0".
+            if (iTotalPages < 1) {
+                iTotalPages = 1;
+            }
+
+            // Clamp current page if filter shrank the result
+            if (iPage > iTotalPages) {
+                iPage = iTotalPages;
+                oViewModel.setProperty("/currentPage", iPage);
+            }
 
             oViewModel.setProperty(
                 "/totalProducts",
@@ -407,77 +470,75 @@ sap.ui.define([
             );
         },
 
-
         // =====================================================
         // PRODUCT CLICK
+        // Table#itemPress passes the row as "listItem" param,
+        // NOT as event source. Handle both shapes.
         // =====================================================
 
         onProductPress: function (oEvent) {
-
             var oItem =
-                oEvent.getSource();
+                oEvent.getParameter("listItem") || oEvent.getSource();
 
-            var oProduct =
-                oItem
-                    .getBindingContext("products")
-                    .getObject();
+            if (!oItem || !oItem.getBindingContext) {
+                return;
+            }
 
+            var oContext = oItem.getBindingContext("display");
+            if (!oContext) {
+                // Fallback for any leftover products> binding
+                oContext = oItem.getBindingContext("products");
+            }
+
+            if (!oContext) {
+                return;
+            }
+
+            var oProduct = oContext.getObject();
 
             this.getView()
                 .getModel("selectedProduct")
                 .setData(oProduct);
 
-
             this._openProductDialog();
         },
-
 
         // =====================================================
         // OPEN PRODUCT DIALOG
         // =====================================================
 
         _openProductDialog: function () {
-
             var oView =
                 this.getView();
 
-
             if (!this.byId("productDialog")) {
-
                 Fragment.load({
-
                     id: oView.getId(),
-
                     name:
                         "myui5app.view.ProductDialog",
-
                     controller: this
-
                 }).then(function (oDialog) {
-
                     oView.addDependent(
                         oDialog
                     );
 
                     oDialog.open();
-
+                }.bind(this)).catch(function (oErr) {
+                    console.error("Failed to load ProductDialog", oErr);
+                    MessageToast.show("Failed to open product details");
                 });
-
             } else {
-
                 this.byId(
                     "productDialog"
                 ).open();
             }
         },
 
-
         // =====================================================
         // CLOSE PRODUCT DIALOG
         // =====================================================
 
         onCloseProductDialog: function () {
-
             this.byId(
                 "productDialog"
             ).close();

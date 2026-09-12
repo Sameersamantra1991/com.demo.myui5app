@@ -4,24 +4,45 @@
 
     <Dialog
         id="productDialog"
-        title="Product Details"
-        contentWidth="400px"
+        title="Product Details: {selectedProduct>/ProductName}"
+        contentWidth="420px"
         stretchOnPhone="true">
 
         <content>
             <VBox class="sapUiMediumMargin" gap="8px">
 
                 <Label text="ID" />
-                <Text text="{selectedProduct>/id}" />
+                <Text text="{selectedProduct>/ProductID}" />
 
                 <Label text="Name" />
-                <Text text="{selectedProduct>/name}" />
+                <Text text="{selectedProduct>/ProductName}" />
+
+                <Label text="Supplier" />
+                <Text text="{selectedProduct>/Supplier/CompanyName}" />
 
                 <Label text="Category" />
-                <Text text="{selectedProduct>/category}" />
+                <Text text="{selectedProduct>/Category/CategoryName}" />
 
                 <Label text="Price" />
-                <Text text="{selectedProduct>/price}" />
+                <ObjectNumber
+                    number="{
+                        path: 'selectedProduct>/UnitPrice',
+                        type: 'sap.ui.model.type.Float',
+                        formatOptions: {
+                            minFractionDigits: 2,
+                            maxFractionDigits: 2
+                        }
+                    }"
+                    unit="USD" />
+
+                <Label text="Stock" />
+                <Text text="{selectedProduct>/UnitsInStock}" />
+
+                <Label text="Units On Order" />
+                <Text text="{selectedProduct>/UnitsOnOrder}" />
+
+                <Label text="Discontinued" />
+                <Text text="{selectedProduct>/Discontinued}" />
 
             </VBox>
         </content>

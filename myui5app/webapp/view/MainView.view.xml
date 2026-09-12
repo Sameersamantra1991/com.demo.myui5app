@@ -2,9 +2,18 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m">
     <Page id="page" title="{i18n>title}">
-
-    <Button
-    text="Products"
-    press=".onProductsPress" />
+        <content>
+            <VBox class="sapUiMediumMargin" gap="8px">
+                <Button
+                    text="Products (Local JSON)"
+                    press=".onProductsPress" />
+                <Button
+                    text="Sample Products (Northwind OData)"
+                    press=".onSampleProductPress" />
+                <Button
+                    text="OData V2 Demo"
+                    press=".onODataV2Press" />
+            </VBox>
+        </content>
     </Page>
 </mvc:View>

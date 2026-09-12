@@ -29,13 +29,16 @@
                         id="productSearch"
                         width="250px"
                         placeholder="Search product..."
-                        liveChange=".onSearch" />
+                        liveChange=".onSearch"
+                        search=".onSearch" />
 
-                    <!-- Category Filter -->
+                    <!-- Category Filter: keys are CategoryID (Northwind 1-8).
+                         Filtering on CategoryID, NOT on Category/CategoryName,
+                         because the V2 service does not support nav-prop filters. -->
                     <Select
                         id="categorySelect"
                         width="180px"
-                        selectedKey=""
+                        selectedKey="{viewModel>/categoryId}"
                         change=".onCategoryFilter">
 
                         <items>
@@ -45,35 +48,35 @@
                                 text="All Categories" />
 
                             <core:Item
-                                key="Beverages"
+                                key="1"
                                 text="Beverages" />
 
                             <core:Item
-                                key="Condiments"
+                                key="2"
                                 text="Condiments" />
 
                             <core:Item
-                                key="Confections"
+                                key="3"
                                 text="Confections" />
 
                             <core:Item
-                                key="Dairy Products"
+                                key="4"
                                 text="Dairy Products" />
 
                             <core:Item
-                                key="Grains/Cereals"
+                                key="5"
                                 text="Grains/Cereals" />
 
                             <core:Item
-                                key="Meat/Poultry"
+                                key="6"
                                 text="Meat/Poultry" />
 
                             <core:Item
-                                key="Produce"
+                                key="7"
                                 text="Produce" />
 
                             <core:Item
-                                key="Seafood"
+                                key="8"
                                 text="Seafood" />
 
                         </items>
@@ -96,10 +99,12 @@
 
                 <Table
                     id="productTable"
-                    items="{products>/displayProducts}"
+                    items="{display>/products}"
                     itemPress=".onProductPress"
                     growing="false"
                     width="100%"
+                    busy="{viewModel>/busy}"
+                    busyIndicatorDelay="0"
                     noDataText="No products found">
 
                     <columns>
@@ -182,28 +187,28 @@
 
                                 <!-- Product ID -->
                                 <Text
-                                    text="{products>ProductID}" />
+                                    text="{display>ProductID}" />
 
 
                                 <!-- Product Name -->
                                 <Text
-                                    text="{products>ProductName}" />
+                                    text="{display>ProductName}" />
 
 
-                                <!-- Supplier -->
+                                <!-- Supplier (requires $expand=Supplier) -->
                                 <Text
-                                    text="{products>Supplier/CompanyName}" />
+                                    text="{display>Supplier/CompanyName}" />
 
 
-                                <!-- Category -->
+                                <!-- Category (requires $expand=Category) -->
                                 <Text
-                                    text="{products>Category/CategoryName}" />
+                                    text="{display>Category/CategoryName}" />
 
 
                                 <!-- Price -->
                                 <ObjectNumber
                                     number="{
-                                        path: 'products>UnitPrice',
+                                        path: 'display>UnitPrice',
                                         type: 'sap.ui.model.type.Float',
                                         formatOptions: {
                                             minFractionDigits: 2,
@@ -215,12 +220,12 @@
 
                                 <!-- Stock -->
                                 <ObjectNumber
-                                    number="{products>UnitsInStock}" />
+                                    number="{display>UnitsInStock}" />
 
 
                                 <!-- Units On Order -->
                                 <ObjectNumber
-                                    number="{products>UnitsOnOrder}" />
+                                    number="{display>UnitsOnOrder}" />
 
                             </cells>
 
@@ -236,6 +241,10 @@
                 <!-- ================================= -->
 
                 <Toolbar>
+
+                    <Text
+                        text="{= ${viewModel>/totalProducts} > 0 ? ${viewModel>/totalProducts} + ' products found' : 'No products' }"
+                        class="sapUiSmallMarginBegin" />
 
                     <ToolbarSpacer />
 
